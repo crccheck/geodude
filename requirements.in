@@ -1,4 +1,6 @@
 aiohttp
+requests
 
 # Dev
+flake8
 pip-tools

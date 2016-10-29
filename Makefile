@@ -8,3 +8,6 @@ install: ## Install requirements
 requirements.txt: ## Regenerate requirements.txt
 requirements.txt: requirements.in
 	pip-compile $< > $@
+
+dev: ## Start the development environment
+	nodemon -w *.py -x python server.py
