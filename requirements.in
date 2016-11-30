@@ -1,5 +1,6 @@
 aiohttp
 requests
+usaddress
 
 # Dev
 pytest

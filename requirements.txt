@@ -10,14 +10,19 @@ chardet==2.3.0            # via aiohttp
 click==6.6                # via pip-tools
 first==2.0.1              # via pip-tools
 flake8==3.2.1
+future==0.16.0            # via usaddress
 mccabe==0.5.2             # via flake8
+metafone==0.5             # via usaddress
 multidict==2.1.3          # via aiohttp, yarl
 pip-tools==1.8.0
+probableparsing==0.0.1    # via usaddress
 py==1.4.31                # via pytest
 pycodestyle==2.2.0        # via flake8
 pyflakes==1.3.0           # via flake8
 pytest-aiohttp==0.1.3
 pytest==3.0.4
+python-crfsuite==0.8.4    # via usaddress
 requests==2.12.1
 six==1.10.0               # via pip-tools
+usaddress==0.5.7
 yarl==0.7.1               # via aiohttp
