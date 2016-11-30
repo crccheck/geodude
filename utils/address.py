@@ -1,10 +1,12 @@
 import logging
 import re
+from collections import namedtuple
 
 import usaddress
 
 
 logger = logging.getLogger(__name__)
+address_components = namedtuple('Address', ['address', 'city', 'state', 'zip'])
 
 
 # A zip+4 or zip+4 with a missing dash
@@ -70,12 +72,15 @@ def component_format(label, value):
     return value
 
 
-def clean_street(address1, address2='', zipcode=None):
+def clean_street(address1, address2='', *, zipcode=None, strip_occupancy=False):
     """
     Clean street address.
 
-    If a zipcode is passed in, we double check to make sure the address was parsed
-    correctly.
+    If a zipcode is passed in, we double check to make sure the address was
+    parsed correctly.
+
+    If strip_occupancy is true, remove components that don't affect geocoding,
+    like floor, apartment, unit, etc.
 
     NOTE: `usaddress` was trained with full addresses, not just street address.
     """
@@ -111,6 +116,9 @@ def clean_street(address1, address2='', zipcode=None):
         except AssertionError:
             logger.warn('Guessed the wrong zipcode {} != {}'
                         .format(guessed_zip, zipcode))
+    if strip_occupancy:
+        addr.pop('OccupancyType', None)
+        addr.pop('OccupancyIdentifier', None)
     if type_ == 'Street Address':
         return ' '.join(
             [component_format(label, value) for label, value in addr.items()])
@@ -119,3 +127,13 @@ def clean_street(address1, address2='', zipcode=None):
             [component_format(label, value) for label, value in addr.items()])
     logger.warn('Ambiguous address: {}'.format(address), extra=addr)
     return address
+
+
+def prep_for_geocoding(address1, address2, city, state, zipcode):
+    """
+    Format an address for geocoding.
+
+    Also serves as the lookup key in the cache.
+    """
+    street = clean_street(address1, address2, zipcode=zipcode, strip_occupancy=True)
+    return address_components(street.upper(), city.upper(), state.upper(), zipcode)

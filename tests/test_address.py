@@ -58,3 +58,21 @@ def test_clean_street_handles_care_of():
     )
     for addr1, addr2, expected in fixtures:
         assert clean_street(addr1, addr2) == expected
+
+
+def test_clean_street_strips_occupancy():
+    fixtures = (
+        ('1001 Congress Avenue Suite 450', '1001 Congress AVE'),
+        ('1001 Congress Ste 200', '1001 Congress'),
+        ('1001 G Street NW #400-E', '1001 G ST NW'),
+        ('1001 Pennsylvania Ave NW Suite 710', '1001 Pennsylvania AVE NW'),
+        ('1005 Congress Ave Ste 1000B', '1005 Congress AVE'),
+        ('101 East Gillis PO Box 677', '101 E Gillis PO Box 677'),
+        ('101 Parklane Boulevard Suite 301', '101 Parklane BLVD'),
+        ('901 E Street NW 10th Floor', '901 E ST NW'),
+        ('1000 Louisiana ST. STE 5600', '1000 Louisiana ST'),
+        ('1000 S. Beckham', '1000 S Beckham'),
+        ('P O Box 7230', 'PO Box 7230'),
+    )
+    for addr1, expected in fixtures:
+        assert clean_street(addr1, strip_occupancy=True) == expected
