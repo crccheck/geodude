@@ -36,9 +36,9 @@ def geocode_address(address, force=False):
     Examples:
     https://geoservices.tamu.edu/Services/Geocode/WebService/v04_01/Simple/Rest/
     """
-    if not address['city'] and not address['zipcode']:
+    if not address['city'] and not address['zip']:
         raise GeocodeException("Can't look up without a city or zip")
-    api_key = os.environ.get('TAMU_API_KEY')
+    api_key = os.getenv('TAMU_API_KEY')
     if not api_key:
         raise GeocodeException(
             "Can't look up without 'TAMU_API_KEY' environment variable")
