@@ -1,7 +1,8 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from server import make_app
 
+TAMU_SUCCESS= '139863c0-e12d-4ace-a0aa-7ad84ca88a4e,4.1,200,30.2754538274838,-97.740133410666,03,StreetSegmentInterpolation,100,Exact,Success,1,StreetSegment,1602.31620959309,Meters,LOCATION_TYPE_STREET_ADDRESS,0.0120012,'
 
 async def test_tamu_lookup_errors_with_bad_input(test_client, loop):
     app = make_app(loop=loop)
@@ -15,14 +16,18 @@ async def test_tamu_lookup_errors_with_bad_input(test_client, loop):
 async def test_tamu_lookup(test_client, loop):
     app = make_app(loop=loop)
     client = await test_client(app)
+    mock_response = MagicMock(
+        ok=True,
+        text=TAMU_SUCCESS,
+    )
 
     with patch('utils.tamu.requests.get') as mock_get:
+        mock_get.return_value = mock_response
         resp = await client.get('/tamu', params={
             'address': '1100 Congress Ave',
             'city': 'austin',
             'state': 'tx',
             'zip': '78701',
         })
-        print(mock_get.call_args)
 
     assert resp.status == 200

@@ -1,8 +1,13 @@
 import asyncio
+import datetime
+import json
+from decimal import Decimal
 
 from aiohttp import web
+from geojson import Feature, Point
 
 from utils.address import prep_for_geocoding
+from utils.json import DjangoJSONEncoder
 from utils.tamu import geocode_address
 
 
@@ -24,9 +29,18 @@ async def tamu_lookup(request):
         state=address_components.state,
         zip=address_components.zip,
     ))
-    print(result)
 
-    return web.Response(text='hi')
+    point = Point((
+        Decimal(result['Longitude']), Decimal(result['Latitude'])
+    ))
+    feature = Feature(geometry=point, properties={
+        'quality': result['NAACCRGISCoordinateQualityCode'],
+        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
+    })
+
+    text = json.dumps(feature, cls=DjangoJSONEncoder)
+
+    return web.Response(text=text)
 
 
 def make_app(loop=None):
