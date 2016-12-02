@@ -7,6 +7,9 @@ from utils.tamu import geocode_address
 
 
 async def tamu_lookup(request):
+    if {'address', 'city', 'state', 'zip'} - set(request.GET):
+        return web.HTTPBadRequest()
+
     address_components = prep_for_geocoding(
         address1=request.GET.get('address'),
         address2='',
@@ -14,6 +17,7 @@ async def tamu_lookup(request):
         state=request.GET.get('state'),
         zipcode=request.GET.get('zip'),
     )
+
     result = geocode_address(dict(
         streetAddress=address_components.address,
         city=address_components.city,
