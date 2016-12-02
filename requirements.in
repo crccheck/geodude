@@ -1,0 +1,10 @@
+aiohttp
+geojson
+requests
+usaddress
+
+# Dev
+pytest
+pytest-aiohttp
+flake8
+pip-tools
