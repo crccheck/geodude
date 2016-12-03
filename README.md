@@ -16,3 +16,24 @@ Query with these get parameters:
 * city
 * state
 * zip
+
+
+#### Example
+
+```
+$ curl 'localhost:8080/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
+{
+  "geometry": {
+    "coordinates": [
+      "-97.740133410666",
+      "30.2754538274838"
+    ],
+    "type": "Point"
+  },
+  "properties": {
+    "timestamp": "2016-12-03T03:42:37.605378Z",
+    "quality": "03"
+  },
+  "type": "Feature"
+}
+```
