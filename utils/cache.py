@@ -20,6 +20,8 @@ class Cache:
     def __init__(self, service, *, data_dir=None):
         self.service = service
         self.data_dir = data_dir or os.getenv('DATA_DIR')
+        if self.data_dir and not os.path.isdir(self.data_dir):
+            logger.warn('%s is not a directory, I will attempt to create it', self.data_dir)
 
     def get(self, address_components):
         if not self.data_dir:
