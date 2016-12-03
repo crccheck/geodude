@@ -1,0 +1,7 @@
+language: python
+cache: pip
+python: "3.5"
+install: make install
+script: make test
+env:
+  - TAMU_API_KEY=00000000000000000000000000000000
