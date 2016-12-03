@@ -1,4 +1,3 @@
-# TODO This module shouldn't really be using a singleton pattern
 import logging
 import os
 
@@ -13,15 +12,17 @@ def get_path(address_components, service):
     )
 
 
-def get(address_components, service):
-    data_dir = os.getenv('DATA_DIR')
-    if not data_dir:
-        logger.debug('Missing DATA_DIR, not retrieving from cache')
-        return
+class Cache:
+    def __init__(self, service, *, data_dir=None):
+        self.service = service
+        self.data_dir = data_dir or os.getenv('DATA_DIR')
 
+    def get(self, address_components):
+        if not self.data_dir:
+            logger.debug('Missing DATA_DIR, not retrieving from cache')
+            return
 
-def save(address_components, service, data):
-    data_dir = os.getenv('DATA_DIR')
-    if not data_dir:
-        logger.debug('Missing DATA_DIR, not saving cache')
-        return
+    def save(self, address_components, data):
+        if not self.data_dir:
+            logger.debug('Missing DATA_DIR, not saving cache')
+            return

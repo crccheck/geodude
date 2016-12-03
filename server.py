@@ -6,8 +6,8 @@ from decimal import Decimal
 from aiohttp import web
 from geojson import Feature, Point
 
-from utils import cache
 from utils.address import prep_for_geocoding
+from utils.cache import Cache
 from utils.json import DjangoJSONEncoder
 from utils.tamu import geocode_address
 
@@ -23,7 +23,8 @@ async def tamu_lookup(request):
         state=request.GET.get('state'),
         zipcode=request.GET.get('zip'),
     )
-    result = cache.get(address_components, 'tamu')
+    cache = Cache('tamu')
+    result = cache.get(address_components)
     if not result:
         result = geocode_address(dict(
             streetAddress=address_components.address,
@@ -31,7 +32,7 @@ async def tamu_lookup(request):
             state=address_components.state,
             zip=address_components.zip,
         ))
-        cache.save(address_components, 'tamu', result)  # TODO do this in the background
+        cache.save(address_components, result)  # TODO do this in the background
 
     point = Point((
         Decimal(result['Longitude']), Decimal(result['Latitude'])
