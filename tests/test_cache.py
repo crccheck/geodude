@@ -1,3 +1,5 @@
+from shutil import rmtree
+from tempfile import mkdtemp
 from unittest import TestCase
 
 from utils.address import address_components
@@ -10,8 +12,23 @@ def test_get_path_can_form_path():
 
 
 class CacheTest(TestCase):
-    cache = Cache('test')
+    address = address_components('address', 'city', 'state', 'zip')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tempdir = mkdtemp(prefix='geo')
+        cls.cache = Cache('test', data_dir=cls.tempdir)
+
+    @classmethod
+    def tearDownClass(cls):
+        assert cls.tempdir
+        # Is this too dangerous to do? Should I rely on the OS to clean up instead?
+        rmtree(cls.tempdir)
 
     def test_get_returns_nothing_for_cold_cache(self):
-        address = address_components('address', 'city', 'state', 'zip')
-        assert not self.cache.get(address)
+        assert not self.cache.get(self.address)
+
+    def test_save_saves_data(self):
+        self.cache.save(self.address, {'foo': 'bar'})
+
+        assert self.cache.get(self.address)['foo'] == 'bar'

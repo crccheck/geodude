@@ -1,5 +1,9 @@
+import json
 import logging
 import os
+
+from utils.json import DjangoJSONEncoder
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +26,20 @@ class Cache:
             logger.debug('Missing DATA_DIR, not retrieving from cache')
             return
 
+        full_path = os.path.join(self.data_dir, get_path(address_components, self.service))
+        try:
+            with open(full_path, 'r') as fp:
+                return json.load(fp)
+
+        except FileNotFoundError:
+            return
+
     def save(self, address_components, data):
         if not self.data_dir:
             logger.debug('Missing DATA_DIR, not saving cache')
             return
+
+        full_path = os.path.join(self.data_dir, get_path(address_components, self.service))
+        os.makedirs(os.path.dirname(full_path))
+        with open(full_path, 'w') as fp:
+            json.dump(data, fp, cls=DjangoJSONEncoder)
