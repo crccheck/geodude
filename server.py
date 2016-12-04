@@ -5,11 +5,20 @@ from decimal import Decimal
 
 from aiohttp import web
 from geojson import Feature, Point
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 from utils.address import prep_for_geocoding
 from utils.cache import Cache
 from utils.json import DjangoJSONEncoder
 from utils.tamu import geocode_address
+
+
+request_count = Counter('request_total', 'Number of geocoding requests', ['service'])
+request_count_cached = Counter(
+    'request_cached_total',
+    'Number of geocoding requests that handled from cache',
+    ['service']
+)
 
 
 async def tamu_lookup(request):
@@ -26,7 +35,9 @@ async def tamu_lookup(request):
     cache = Cache('tamu')
     result = cache.get(address_components)
     is_from_cache = bool(result)
-    if not result:
+    if is_from_cache:
+        request_count_cached.labels('tamu').inc()
+    else:
         result = geocode_address(dict(
             streetAddress=address_components.address,
             city=address_components.city,
@@ -45,12 +56,25 @@ async def tamu_lookup(request):
 
     text = json.dumps(feature, cls=DjangoJSONEncoder)
 
+    request_count.labels('tamu').inc()
+
+    return web.Response(
+        text=text,
+        content_type='application/json',
+        headers={
+            'X-From-Cache': '1' if is_from_cache else '0',  # TODO better header name
+        },
+    )
+
+
+async def metrics(request):
+    text = generate_latest().decode('utf-8')
     return web.Response(
         text=text,
         headers={
-            'Content-Type': 'application/json',
-            'X-From-Cache': '1' if is_from_cache else '0',  # TODO better header name
-        },
+            # We have to set this manually to avoid asyncio's charset logic
+            'Counter-Type': CONTENT_TYPE_LATEST,
+        }
     )
 
 
@@ -59,6 +83,7 @@ def make_app(loop=None):
         loop = asyncio.get_event_loop()
     app = web.Application(loop=loop)
     app.router.add_get('/tamu', tamu_lookup)
+    app.router.add_get('/metrics', metrics)
     return app
 
 
