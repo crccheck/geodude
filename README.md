@@ -1,8 +1,13 @@
+Geodude
+=======
+
 [![Build Status](https://travis-ci.org/crccheck/geodude.svg?branch=master)](https://travis-ci.org/crccheck/geodude)
 
-Create your own personal geocoder cache!
+Your geocoding buddy. Create your own personal geocoder cache!
 
-### Features
+
+Features
+--------
 
 - Queries against multiple services (currently, only [TAMU])
 - Caches results, so you don't use up your api credits
@@ -10,7 +15,8 @@ Create your own personal geocoder cache!
 - Results come back as GeoJSON
 
 
-### Usage
+Usage
+-----
 
 Query with these get parameters:
 
@@ -20,7 +26,7 @@ Query with these get parameters:
 * zip
 
 
-#### Example
+### Example
 
 ```
 $ curl 'localhost:8080/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
@@ -39,3 +45,14 @@ $ curl 'localhost:8080/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=7
   "type": "Feature"
 }
 ```
+
+### Docker
+
+See the `docker-compose.yml` and `Dockerfile` for more examples on how to run
+this.
+
+
+## Deployment
+
+This is meant for private use and deployed locally. Eventually, I might
+document putting it behind an API gateway to lock down access.
