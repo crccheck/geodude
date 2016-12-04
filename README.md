@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/crccheck/geocache.svg?branch=master)](https://travis-ci.org/crccheck/geocache)
+[![Build Status](https://travis-ci.org/crccheck/geodude.svg?branch=master)](https://travis-ci.org/crccheck/geodude)
 
 Create your own personal geocoder cache!
 

@@ -9,6 +9,9 @@ install: ## Install requirements
 requirements.txt: ## Regenerate requirements.txt
 	pip-compile requirements.in > $@
 
+clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} \; || true
+
 dev: ## Start the development environment
 	nodemon --ext py -x python server.py
 
