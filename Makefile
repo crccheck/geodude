@@ -16,4 +16,4 @@ tdd: ## Run tests with a watcher
 	nodemon --ext py -x sh -c "pytest -sx || true"
 
 test: ## Run test suite
-	pytest
+	pytest --cov
