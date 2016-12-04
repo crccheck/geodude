@@ -17,7 +17,6 @@ class CacheTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tempdir = mkdtemp(prefix='geo')
-        cls.cache = Cache('test', data_dir=cls.tempdir)
 
     @classmethod
     def tearDownClass(cls):
@@ -25,10 +24,16 @@ class CacheTest(TestCase):
         # Is this too dangerous to do? Should I rely on the OS to clean up instead?
         rmtree(cls.tempdir)
 
+    def test_init_accepts_nonexistent_dir(self):
+        Cache('test', data_dir='/tmp/non-existent-dir')
+        # I could assert that the logger was called but I don't care.
+
     def test_get_returns_nothing_for_cold_cache(self):
-        assert not self.cache.get(self.address)
+        cache = Cache('test', data_dir=self.tempdir)
+        assert not cache.get(self.address)
 
     def test_save_saves_data(self):
-        self.cache.save(self.address, {'foo': 'bar'})
+        cache = Cache('test', data_dir=self.tempdir)
+        cache.save(self.address, {'foo': 'bar'})
 
-        assert self.cache.get(self.address)['foo'] == 'bar'
+        assert cache.get(self.address)['foo'] == 'bar'
