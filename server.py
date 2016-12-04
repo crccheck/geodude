@@ -13,8 +13,12 @@ from utils.json import DjangoJSONEncoder
 from utils.tamu import geocode_address
 
 
-request_count = Counter('request_total', 'Description', ['service'])
-request_count_cached = Counter('request_cached_total', 'Description', ['service'])
+request_count = Counter('request_total', 'Number of geocoding requests', ['service'])
+request_count_cached = Counter(
+    'request_cached_total',
+    'Number of geocoding requests that handled from cache',
+    ['service']
+)
 
 
 async def tamu_lookup(request):
