@@ -8,6 +8,7 @@ aiohttp==1.1.6
 async-timeout==1.1.0      # via aiohttp
 chardet==2.3.0            # via aiohttp
 click==6.6                # via pip-tools
+coverage==4.2             # via pytest.cov
 first==2.0.1              # via pip-tools
 flake8==3.2.1
 future==0.16.0            # via usaddress
@@ -21,12 +22,13 @@ py==1.4.31                # via pytest
 pycodestyle==2.2.0        # via flake8
 pyflakes==1.3.0           # via flake8
 pytest-aiohttp==0.1.3
+pytest.cov==2.4.0
 pytest==3.0.4
 python-crfsuite==0.8.4    # via usaddress
 requests==2.12.3
 six==1.10.0               # via pip-tools
 usaddress==0.5.7
-yarl==0.7.1               # via aiohttp
+yarl==0.8.1               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools                # via geojson

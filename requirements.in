@@ -4,6 +4,7 @@ requests
 usaddress
 
 # Dev
+pytest.cov
 pytest
 pytest-aiohttp
 flake8
