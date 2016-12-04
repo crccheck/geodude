@@ -31,7 +31,7 @@ async def tamu_lookup(request):
     cache = Cache('tamu')
     result = cache.get(address_components)
     is_from_cache = bool(result)
-    if result:
+    if is_from_cache:
         request_count_cached.labels('tamu').inc()
     else:
         result = geocode_address(dict(

@@ -2,7 +2,9 @@ from unittest.mock import patch, MagicMock
 
 from server import make_app
 
-TAMU_SUCCESS= '139863c0-e12d-4ace-a0aa-7ad84ca88a4e,4.1,200,30.2754538274838,-97.740133410666,03,StreetSegmentInterpolation,100,Exact,Success,1,StreetSegment,1602.31620959309,Meters,LOCATION_TYPE_STREET_ADDRESS,0.0120012,'
+# Why isn't there a noqa-next-line ?
+TAMU_SUCCESS= '139863c0-e12d-4ace-a0aa-7ad84ca88a4e,4.1,200,30.2754538274838,-97.740133410666,03,StreetSegmentInterpolation,100,Exact,Success,1,StreetSegment,1602.31620959309,Meters,LOCATION_TYPE_STREET_ADDRESS,0.0120012,'  # noqa
+
 
 async def test_tamu_lookup_errors_with_bad_input(test_client, loop):
     app = make_app(loop=loop)
@@ -31,3 +33,14 @@ async def test_tamu_lookup(test_client, loop):
         })
 
     assert resp.status == 200
+    assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
+
+
+async def test_metrics(test_client, loop):
+    app = make_app(loop=loop)
+    client = await test_client(app)
+
+    resp = await client.get('/metrics')
+
+    assert resp.status == 200
+    assert resp.headers['Content-Type'] == 'text/plain; charset=utf-8'
