@@ -6,6 +6,6 @@ usaddress
 # Dev
 pytest
 pytest-aiohttp
-pytest.cov
+pytest-cov
 flake8
 pip-tools
