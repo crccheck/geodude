@@ -36,6 +36,11 @@ logging.config.dictConfig({
             'level': 'INFO',
             'handlers': ['console'],
         },
+        'aiohttp.access': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        }
     },
 })
 request_count = Counter('request_total', 'Number of geocoding requests', ['service'])
