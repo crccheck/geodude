@@ -22,7 +22,7 @@ logging.config.dictConfig({
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': os.getenv('LOGGING_LEVEL', 'DEBUG'),
             'class': 'project_runpy.ColorizingStreamHandler',
             'formatter': 'main',
         },

@@ -37,3 +37,10 @@ class CacheTest(TestCase):
         cache.save(self.address, {'foo': 'bar'})
 
         assert cache.get(self.address)['foo'] == 'bar'
+
+    def test_save_can_overwrite_data(self):
+        cache = Cache('test', data_dir=self.tempdir)
+        cache.save(self.address, {'foo': 'bar'})
+        cache.save(self.address, {'foo': 'baz'})
+
+        assert cache.get(self.address)['foo'] == 'baz'
