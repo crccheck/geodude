@@ -42,6 +42,9 @@ class Cache:
             return
 
         full_path = os.path.join(self.data_dir, get_path(address_components, self.service))
+        # dirname = os.path.dirname(full_path)
+        # if not os.path.isdir(dirname):
+        #     os.makedirs(dirname)
         os.makedirs(os.path.dirname(full_path))
         with open(full_path, 'w') as fp:
             json.dump(data, fp, cls=DjangoJSONEncoder)
