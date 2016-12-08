@@ -29,7 +29,9 @@ logging.config.dictConfig({
     },
     'formatters': {
         'main': {
-            'format': '[%(module)s] %(message)s',
+            # Docs:
+            # https://docs.python.org/3/library/logging.html#logrecord-attributes
+            'format': '[%(name)s] %(message)s',
         },
     },
     'loggers': {
