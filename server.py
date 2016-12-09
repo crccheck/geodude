@@ -7,7 +7,7 @@ import os
 from decimal import Decimal
 
 from aiohttp import web
-from geojson import Feature, Point
+from geojson import Feature, FeatureCollection, Point
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 from utils.address import prep_for_geocoding
@@ -57,10 +57,8 @@ request_count_cached = Counter(
 async def get_from_tamu(address_components):
     cache = Cache('tamu')
     result = cache.get(address_components)
-    is_from_cache = bool(result)
-    if is_from_cache:
-        request_count_cached.labels('tamu').inc()
-    else:
+    is_cached = bool(result)
+    if not is_cached:
         result = geocode_address(dict(
             streetAddress=address_components.address,
             city=address_components.city,
@@ -68,7 +66,17 @@ async def get_from_tamu(address_components):
             zip=address_components.zip,
         ))
         cache.save(address_components, result)  # TODO do this in the background
-    return (result, not is_from_cache)
+
+    point = Point((
+        Decimal(result['Longitude']), Decimal(result['Latitude'])
+    ))
+    feature = Feature(geometry=point, properties={
+        'quality': result['NAACCRGISCoordinateQualityCode'],
+        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
+        'cached': is_cached,
+    })
+
+    return (feature, not is_cached)
 
 
 async def tamu_lookup(request):
@@ -83,22 +91,14 @@ async def tamu_lookup(request):
         zipcode=request.GET.get('zip'),
     )
 
-    result, created = await get_from_tamu(address_components)
-
-    point = Point((
-        Decimal(result['Longitude']), Decimal(result['Latitude'])
-    ))
-    feature = Feature(geometry=point, properties={
-        'quality': result['NAACCRGISCoordinateQualityCode'],
-        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
-    })
-
-    text = json.dumps(feature, cls=DjangoJSONEncoder)
+    feature, created = await get_from_tamu(address_components)
 
     request_count.labels('tamu').inc()
+    if not created:
+        request_count_cached.labels('tamu').inc()
 
     return web.Response(
-        text=text,
+        text=json.dumps(feature, cls=DjangoJSONEncoder),
         content_type='application/json',
         headers={
             'X-From-Cache': '1' if created else '0',  # TODO better header name
@@ -107,8 +107,34 @@ async def tamu_lookup(request):
 
 
 async def lookup(request):
-    pass
+    if {'address', 'city', 'state', 'zip'} - set(request.GET):
+        return web.HTTPBadRequest()
 
+    address_components = prep_for_geocoding(
+        address1=request.GET.get('address'),
+        address2='',
+        city=request.GET.get('city'),
+        state=request.GET.get('state'),
+        zipcode=request.GET.get('zip'),
+    )
+
+    tamu_feature, tamu_created = await get_from_tamu(address_components)
+
+    if True:
+        # TODO average lookups
+        data = tamu_feature
+    else:
+        # TODO support multiple points if users requests
+        data = FeatureCollection([tamu_feature])
+
+    text = json.dumps(data, cls=DjangoJSONEncoder)
+
+    request_count.labels('tamu').inc()
+
+    return web.Response(
+        text=text,
+        content_type='application/json',
+    )
 
 
 async def metrics(request):
