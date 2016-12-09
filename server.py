@@ -54,17 +54,7 @@ request_count_cached = Counter(
 )
 
 
-async def tamu_lookup(request):
-    if {'address', 'city', 'state', 'zip'} - set(request.GET):
-        return web.HTTPBadRequest()
-
-    address_components = prep_for_geocoding(
-        address1=request.GET.get('address'),
-        address2='',
-        city=request.GET.get('city'),
-        state=request.GET.get('state'),
-        zipcode=request.GET.get('zip'),
-    )
+async def get_from_tamu(address_components):
     cache = Cache('tamu')
     result = cache.get(address_components)
     is_from_cache = bool(result)
@@ -78,6 +68,22 @@ async def tamu_lookup(request):
             zip=address_components.zip,
         ))
         cache.save(address_components, result)  # TODO do this in the background
+    return (result, not is_from_cache)
+
+
+async def tamu_lookup(request):
+    if {'address', 'city', 'state', 'zip'} - set(request.GET):
+        return web.HTTPBadRequest()
+
+    address_components = prep_for_geocoding(
+        address1=request.GET.get('address'),
+        address2='',
+        city=request.GET.get('city'),
+        state=request.GET.get('state'),
+        zipcode=request.GET.get('zip'),
+    )
+
+    result, created = await get_from_tamu(address_components)
 
     point = Point((
         Decimal(result['Longitude']), Decimal(result['Latitude'])
@@ -95,9 +101,14 @@ async def tamu_lookup(request):
         text=text,
         content_type='application/json',
         headers={
-            'X-From-Cache': '1' if is_from_cache else '0',  # TODO better header name
+            'X-From-Cache': '1' if created else '0',  # TODO better header name
         },
     )
+
+
+async def lookup(request):
+    pass
+
 
 
 async def metrics(request):
@@ -115,7 +126,8 @@ def make_app(loop=None):
     if loop is None:
         loop = asyncio.get_event_loop()
     app = web.Application(loop=loop)
-    app.router.add_get('/tamu', tamu_lookup)
+    app.router.add_get('/lookup', lookup)
+    app.router.add_get('/lookup/tamu', tamu_lookup)
     app.router.add_get('/metrics', metrics)
     return app
 

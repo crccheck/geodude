@@ -10,7 +10,7 @@ async def test_tamu_lookup_errors_with_bad_input(test_client, loop):
     app = make_app(loop=loop)
     client = await test_client(app)
 
-    resp = await client.get('/tamu')
+    resp = await client.get('/lookup/tamu')
 
     assert resp.status == 400
 
@@ -25,7 +25,7 @@ async def test_tamu_lookup(test_client, loop):
 
     with patch('utils.tamu.requests.get') as mock_get:
         mock_get.return_value = mock_response
-        resp = await client.get('/tamu', params={
+        resp = await client.get('/lookup/tamu', params={
             'address': '1100 Congress Ave',
             'city': 'austin',
             'state': 'tx',
