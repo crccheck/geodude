@@ -45,7 +45,7 @@ async def test_lookup(test_client, loop):
     app = make_app(loop=loop)
     client = await test_client(app)
 
-    mock_get = AsyncMock(return_value=[{'foo': 'bar'}, False])
+    mock_get = AsyncMock(return_value={'foo': 'bar'})
 
     with patch('server.get_from_tamu', new=mock_get):
         resp = await client.get('/lookup', params={

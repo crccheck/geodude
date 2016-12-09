@@ -73,10 +73,10 @@ async def get_from_tamu(address_components):
     feature = Feature(geometry=point, properties={
         'quality': result['NAACCRGISCoordinateQualityCode'],
         'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
-        'cached': is_cached,
+        'cached': is_cached,  # should this be a timestamp?
     })
 
-    return (feature, not is_cached)
+    return feature
 
 
 async def tamu_lookup(request):
@@ -91,17 +91,18 @@ async def tamu_lookup(request):
         zipcode=request.GET.get('zip'),
     )
 
-    feature, created = await get_from_tamu(address_components)
+    feature = await get_from_tamu(address_components)
 
     request_count.labels('tamu').inc()
-    if not created:
+    if feature['properties']['cached']:
         request_count_cached.labels('tamu').inc()
 
     return web.Response(
         text=json.dumps(feature, cls=DjangoJSONEncoder),
         content_type='application/json',
         headers={
-            'X-From-Cache': '1' if created else '0',  # TODO better header name
+            # TODO better header name
+            'X-From-Cache': '1' if feature['properties']['cached'] else '0',
         },
     )
 
@@ -118,7 +119,7 @@ async def lookup(request):
         zipcode=request.GET.get('zip'),
     )
 
-    tamu_feature, tamu_created = await get_from_tamu(address_components)
+    tamu_feature = await get_from_tamu(address_components)
 
     if True:
         # TODO average lookups
