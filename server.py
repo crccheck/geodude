@@ -1,6 +1,9 @@
 import asyncio
 import datetime
 import json
+import logging
+import logging.config
+import os
 from decimal import Decimal
 
 from aiohttp import web
@@ -13,6 +16,36 @@ from utils.json import DjangoJSONEncoder
 from utils.tamu import geocode_address
 
 
+logger = logging.getLogger(__name__)
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': os.getenv('LOGGING_LEVEL', 'DEBUG'),
+            'class': 'project_runpy.ColorizingStreamHandler',
+            'formatter': 'main',
+        },
+    },
+    'formatters': {
+        'main': {
+            # Docs:
+            # https://docs.python.org/3/library/logging.html#logrecord-attributes
+            'format': '[%(name)s] %(message)s',
+        },
+    },
+    'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': ['console'],
+        },
+        'aiohttp.access': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        }
+    },
+})
 request_count = Counter('request_total', 'Number of geocoding requests', ['service'])
 request_count_cached = Counter(
     'request_cached_total',
@@ -88,4 +121,5 @@ def make_app(loop=None):
 
 
 if __name__ == '__main__':
+    logging.info('Using data directory: %s', os.getenv('DATA_DIR'))
     web.run_app(make_app())
