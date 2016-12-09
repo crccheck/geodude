@@ -41,7 +41,7 @@ async def test_tamu_lookup(test_client, loop):
     assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
 
 
-async def test_lookup(test_client, loop):
+async def test_lookup_returns_service_response(test_client, loop):
     app = make_app(loop=loop)
     client = await test_client(app)
 
@@ -59,6 +59,27 @@ async def test_lookup(test_client, loop):
     assert resp.status == 200
     assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
     assert out == {'foo': 'bar'}
+
+
+async def test_lookup_returns_all_service_responses(test_client, loop):
+    app = make_app(loop=loop)
+    client = await test_client(app)
+
+    mock_get = AsyncMock(return_value={'foo': 'bar'})
+
+    with patch('server.get_from_tamu', new=mock_get):
+        resp = await client.get('/lookup', params={
+            'address': '1100 Congress Ave',
+            'city': 'austin',
+            'state': 'tx',
+            'zip': '78701',
+            'return': 'collection',
+        })
+    out = await resp.json()
+
+    assert resp.status == 200
+    assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
+    assert out == {'features': [{'foo': 'bar'}], 'type': 'FeatureCollection'}
 
 
 async def test_metrics(test_client, loop):

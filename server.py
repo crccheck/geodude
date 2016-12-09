@@ -121,12 +121,12 @@ async def lookup(request):
 
     tamu_feature = await get_from_tamu(address_components)
 
-    if True:
-        # TODO average lookups
-        data = tamu_feature
-    else:
+    if request.GET.get('return') == 'collection':
         # TODO support multiple points if users requests
         data = FeatureCollection([tamu_feature])
+    else:
+        # TODO average lookups
+        data = tamu_feature
 
     text = json.dumps(data, cls=DjangoJSONEncoder)
 
