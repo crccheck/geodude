@@ -2,7 +2,7 @@ import os
 
 import requests
 
-from . import GeocodeException
+from . import GeocodeException, USER_AGENT
 
 
 def geocode_address(address):
@@ -23,7 +23,7 @@ def geocode_address(address):
     if os.getenv('EMAIL'):
         params['email'] = os.getenv('EMAIL')
     headers = {
-        'user-agent': 'geodude/v0.0',
+        'user-agent': USER_AGENT,
     }
     response = requests.get(
         'https://nominatim.openstreetmap.org/search',

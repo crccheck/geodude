@@ -2,7 +2,7 @@ import os
 
 import requests
 
-from . import GeocodeException
+from . import GeocodeException, USER_AGENT
 
 
 def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
@@ -49,7 +49,7 @@ def geocode_address(address):
         'zip': address.zip,
     }
     headers = {
-        'user-agent': 'geodude/v0.0',
+        'user-agent': USER_AGENT,
     }
     response = requests.get(url, params=params, headers=headers)
     if not response.ok:
