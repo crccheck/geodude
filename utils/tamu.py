@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from . import GeocodeException
+
 
 def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
     """
@@ -20,10 +22,6 @@ def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
     key, credits = response.text.split(',')
     assert key == api_key
     return int(credits)
-
-
-class GeocodeException(Exception):
-    pass
 
 
 def geocode_address(address, force=False):
@@ -56,9 +54,7 @@ def geocode_address(address, force=False):
     }
     response = requests.get(url, params=params, headers=headers)
     if not response.ok:
-        raise GeocodeException(
-            'Got a non-200 response: {}'
-            .format(response.status_code))
+        raise GeocodeException('Got a non-200 response: {}'.format(response.status_code))
     fields = [
         'TransactionId',
         'Version',

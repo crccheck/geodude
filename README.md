@@ -9,7 +9,9 @@ Your geocoding buddy. Create your own personal geocoder cache!
 Features
 --------
 
-- Queries against multiple services (currently, only [TAMU])
+- Queries against multiple services:
+  - [TAMU](https://github.com/crccheck/geodude/wiki/TAMU)
+  - [OSM](https://github.com/crccheck/geodude/wiki/Open-Street-Map)
 - Caches results, so you don't use up your api credits
 - Normalizes addresses, so you don't do unnecessary queries (US only)
 - Results come back as GeoJSON
