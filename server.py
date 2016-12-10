@@ -95,12 +95,7 @@ class TAMULookup(Lookup):
         result = cache.get(address_components)
         is_cached = bool(result)
         if not is_cached:
-            result = tamu_geocode_address(dict(
-                streetAddress=address_components.address,
-                city=address_components.city,
-                state=address_components.state,
-                zip=address_components.zip,
-            ))
+            result = tamu_geocode_address(address_components)
             cache.save(address_components, result)  # TODO do this in the background
 
         point = Point((
