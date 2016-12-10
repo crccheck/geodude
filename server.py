@@ -145,16 +145,17 @@ async def lookup(request):
         zipcode=request.GET.get('zip'),
     )
 
-    all_features = await asyncio.gather(*[
-        asyncio.ensure_future(TAMULookup.get_from_backend(address_components)),
-        asyncio.ensure_future(OSMLookup.get_from_backend(address_components)),
-    ])
+    backends = [TAMULookup, OSMLookup]
+    all_features = await asyncio.gather(*map(
+        lambda x: asyncio.ensure_future(x.get_from_backend(address_components)),
+        backends
+    ))
 
     if request.GET.get('return') == 'collection':
         # TODO support multiple points if users requests
         data = FeatureCollection(all_features)
     else:
-        # TODO average lookups
+        # TODO average features
         data = all_features[0]
 
     text = json.dumps(data, cls=GeoJSONEncoder)
