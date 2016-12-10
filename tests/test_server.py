@@ -65,21 +65,23 @@ async def test_lookup_returns_all_service_responses(test_client, loop):
     app = make_app(loop=loop)
     client = await test_client(app)
 
-    mock_get = AsyncMock(return_value={'foo': 'bar'})
+    mock_osm = AsyncMock(return_value={'foo': 'osm'})
+    mock_tamu = AsyncMock(return_value={'foo': 'tamu'})
 
-    with patch('server.TAMULookup.get_from_backend', new=mock_get):
-        resp = await client.get('/lookup', params={
-            'address': '1100 Congress Ave',
-            'city': 'austin',
-            'state': 'tx',
-            'zip': '78701',
-            'return': 'collection',
-        })
+    with patch('server.OSMLookup.get_from_backend', new=mock_osm):
+        with patch('server.TAMULookup.get_from_backend', new=mock_tamu):
+            resp = await client.get('/lookup', params={
+                'address': '1100 Congress Ave',
+                'city': 'austin',
+                'state': 'tx',
+                'zip': '78701',
+                'return': 'collection',
+            })
     out = await resp.json()
 
     assert resp.status == 200
     assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
-    assert out == {'features': [{'foo': 'bar'}], 'type': 'FeatureCollection'}
+    assert out == {'features': [{'foo': 'tamu'}, {'foo': 'osm'}], 'type': 'FeatureCollection'}
 
 
 async def test_metrics(test_client, loop):

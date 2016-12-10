@@ -58,17 +58,22 @@ request_count_cached = Counter(
 class Lookup(web.View):
     name = None
 
-    async def get(self):
+    def get_address(self):
         if {'address', 'city', 'state', 'zip'} - set(self.request.GET):
-            return web.HTTPBadRequest()
+            return  # TODO raise exception
 
-        address_components = prep_for_geocoding(
+        return prep_for_geocoding(
             address1=self.request.GET.get('address'),
             address2='',
             city=self.request.GET.get('city'),
             state=self.request.GET.get('state'),
             zipcode=self.request.GET.get('zip'),
         )
+
+    async def get(self):
+        address_components = self.get_address()
+        if not address_components:
+            return web.HTTPBadRequest()
 
         feature = await self.get_from_backend(address_components)
 
@@ -133,39 +138,31 @@ class OSMLookup(Lookup):
         return feature
 
 
-async def lookup(request):
-    if {'address', 'city', 'state', 'zip'} - set(request.GET):
-        return web.HTTPBadRequest()
+class MasterLookup(Lookup):
+    async def get(self):
+        loop = self.request.app.loop  # alias
+        address_components = self.get_address()
 
-    address_components = prep_for_geocoding(
-        address1=request.GET.get('address'),
-        address2='',
-        city=request.GET.get('city'),
-        state=request.GET.get('state'),
-        zipcode=request.GET.get('zip'),
-    )
+        backends = [TAMULookup, OSMLookup]
+        all_features = await asyncio.gather(*map(
+            lambda x: asyncio.ensure_future(x.get_from_backend(address_components), loop=loop),
+            backends
+        ))
 
-    backends = [TAMULookup, OSMLookup]
-    all_features = await asyncio.gather(*map(
-        lambda x: asyncio.ensure_future(x.get_from_backend(address_components)),
-        backends
-    ))
+        if self.request.GET.get('return') == 'collection':
+            data = FeatureCollection(all_features)
+        else:
+            # TODO average features
+            data = all_features[0]
 
-    if request.GET.get('return') == 'collection':
-        # TODO support multiple points if users requests
-        data = FeatureCollection(all_features)
-    else:
-        # TODO average features
-        data = all_features[0]
+        text = json.dumps(data, cls=GeoJSONEncoder)
 
-    text = json.dumps(data, cls=GeoJSONEncoder)
+        request_count.labels('tamu').inc()
 
-    request_count.labels('tamu').inc()
-
-    return web.Response(
-        text=text,
-        content_type='application/json',
-    )
+        return web.Response(
+            text=text,
+            content_type='application/json',
+        )
 
 
 async def metrics(request):
@@ -183,9 +180,9 @@ def make_app(loop=None):
     if loop is None:
         loop = asyncio.get_event_loop()
     app = web.Application(loop=loop)
-    app.router.add_get('/lookup', lookup)
-    app.router.add_get('/lookup/tamu', TAMULookup)
+    app.router.add_get('/lookup', MasterLookup)
     app.router.add_get('/lookup/osm', OSMLookup)
+    app.router.add_get('/lookup/tamu', TAMULookup)
     app.router.add_get('/metrics', metrics)
     return app
 
