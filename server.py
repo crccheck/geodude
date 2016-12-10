@@ -90,7 +90,36 @@ class TAMULookup(Lookup):
 
     @staticmethod
     async def get_from_backend(address_components):
-        cache = Cache('tamu')
+        cache = Cache(TAMULookup.name)
+        result = cache.get(address_components)
+        is_cached = bool(result)
+        if not is_cached:
+            result = geocode_address(dict(
+                streetAddress=address_components.address,
+                city=address_components.city,
+                state=address_components.state,
+                zip=address_components.zip,
+            ))
+            cache.save(address_components, result)  # TODO do this in the background
+
+        point = Point((
+            Decimal(result['Longitude']), Decimal(result['Latitude'])
+        ))
+        feature = Feature(geometry=point, properties={
+            'quality': result['NAACCRGISCoordinateQualityCode'],
+            'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
+            'cached': is_cached,  # should this be a timestamp?
+        })
+
+        return feature
+
+
+class OSMLookup(Lookup):
+    name = 'tamu'
+
+    @staticmethod
+    async def get_from_backend(address_components):
+        cache = Cache(OSMLookup.name)
         result = cache.get(address_components)
         is_cached = bool(result)
         if not is_cached:
@@ -162,7 +191,7 @@ def make_app(loop=None):
     app = web.Application(loop=loop)
     app.router.add_get('/lookup', lookup)
     app.router.add_get('/lookup/tamu', TAMULookup)
-    # app.router.add_get('/lookup/osm', osm_lookup)
+    app.router.add_get('/lookup/osm', OSMLookup)
     app.router.add_get('/metrics', metrics)
     return app
 
