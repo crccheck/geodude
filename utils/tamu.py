@@ -50,7 +50,7 @@ def geocode_address(address):
     }
     params.update(address)
     headers = {
-        'user-agent': 'my-little-pointies/v0.0'
+        'user-agent': 'geodude/v0.0',
     }
     response = requests.get(url, params=params, headers=headers)
     if not response.ok:

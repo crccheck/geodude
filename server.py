@@ -116,27 +116,21 @@ class TAMULookup(Lookup):
 
 
 class OSMLookup(Lookup):
-    name = 'tamu'
+    name = 'osm'
 
     @staticmethod
     async def get_from_backend(address_components):
         cache = Cache(OSMLookup.name)
         result = cache.get(address_components)
         is_cached = bool(result)
-        if not is_cached:
-            result = osm_geocode_address(dict(
-                streetAddress=address_components.address,
-                city=address_components.city,
-                state=address_components.state,
-                zip=address_components.zip,
-            ))
+        if True or not is_cached:
+            result = osm_geocode_address(address_components)
             cache.save(address_components, result)  # TODO do this in the background
 
         point = Point((
-            Decimal(result['Longitude']), Decimal(result['Latitude'])
+            Decimal(result['lon']), Decimal(result['lat'])
         ))
         feature = Feature(geometry=point, properties={
-            'quality': result['NAACCRGISCoordinateQualityCode'],
             'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
             'cached': is_cached,  # should this be a timestamp?
         })

@@ -33,7 +33,7 @@ class DjangoJSONEncoder(json.JSONEncoder):
         # elif isinstance(o, datetime.timedelta):
         #     return duration_iso_string(o)
         elif isinstance(o, decimal.Decimal):
-            return str(o)
+            return float(o)
         # elif isinstance(o, uuid.UUID):
         #     return str(o)
         # elif isinstance(o, Promise):

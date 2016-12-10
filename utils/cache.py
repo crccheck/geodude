@@ -33,7 +33,7 @@ class Cache:
             with open(full_path, 'r') as fp:
                 return json.load(fp)
 
-        except FileNotFoundError:
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
             return
 
     def save(self, address_components, data):
