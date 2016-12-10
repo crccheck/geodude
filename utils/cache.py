@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from utils.json import DjangoJSONEncoder
+from utils.json import GeoJSONEncoder
 
 
 logger = logging.getLogger(__name__)
@@ -46,4 +46,4 @@ class Cache:
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
         with open(full_path, 'w') as fp:
-            json.dump(data, fp, cls=DjangoJSONEncoder)
+            json.dump(data, fp, cls=GeoJSONEncoder)

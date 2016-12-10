@@ -1,5 +1,5 @@
 """
-Django's JSON Encoder
+An edit of Django's JSON Encoder for GeoJSON
 
 https://github.com/django/django/blob/master/django/core/serializers/json.py
 """
@@ -8,7 +8,7 @@ import decimal
 import json
 
 
-class DjangoJSONEncoder(json.JSONEncoder):
+class GeoJSONEncoder(json.JSONEncoder):
     """
     JSONEncoder subclass that knows how to encode date/time, decimal types and UUIDs.
     """
@@ -21,22 +21,17 @@ class DjangoJSONEncoder(json.JSONEncoder):
             if r.endswith('+00:00'):
                 r = r[:-6] + 'Z'
             return r
+
         elif isinstance(o, datetime.date):
             return o.isoformat()
+
         elif isinstance(o, datetime.time):
-            # if is_aware(o):
-            #     raise ValueError("JSON can't represent timezone-aware times.")
             r = o.isoformat()
             if o.microsecond:
                 r = r[:12]
             return r
-        # elif isinstance(o, datetime.timedelta):
-        #     return duration_iso_string(o)
+
         elif isinstance(o, decimal.Decimal):
             return float(o)
-        # elif isinstance(o, uuid.UUID):
-        #     return str(o)
-        # elif isinstance(o, Promise):
-        #     return six.text_type(o)
-        else:
-            return super(DjangoJSONEncoder, self).default(o)
+
+        return super().default(o)

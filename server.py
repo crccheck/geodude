@@ -12,7 +12,7 @@ from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 from utils.address import prep_for_geocoding
 from utils.cache import Cache
-from utils.json import DjangoJSONEncoder
+from utils.json import GeoJSONEncoder
 from utils.osm import geocode_address as osm_geocode_address
 from utils.tamu import geocode_address as tamu_geocode_address
 
@@ -77,7 +77,7 @@ class Lookup(web.View):
             request_count_cached.labels(self.name).inc()
 
         return web.Response(
-            text=json.dumps(feature, cls=DjangoJSONEncoder),
+            text=json.dumps(feature, cls=GeoJSONEncoder),
             content_type='application/json',
             headers={
                 # TODO better header name
@@ -159,7 +159,7 @@ async def lookup(request):
         # TODO average lookups
         data = tamu_feature
 
-    text = json.dumps(data, cls=DjangoJSONEncoder)
+    text = json.dumps(data, cls=GeoJSONEncoder)
 
     request_count.labels('tamu').inc()
 
