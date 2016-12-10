@@ -97,13 +97,14 @@ $ curl --silent 'localhost:8080/lookup?address=1100+Congress+Ave&city=austin&sta
 }
 ```
 
+Deploying this
+--------------
+
+This is meant for private use and deployed locally. Eventually, I might
+document putting it behind an API gateway to lock down access. See
+`example.env` for what environment variables you'll need.
+
 ### Docker
 
 See the `docker-compose.yml` and `Dockerfile` for more examples on how to run
 this.
-
-
-## Deployment
-
-This is meant for private use and deployed locally. Eventually, I might
-document putting it behind an API gateway to lock down access.
