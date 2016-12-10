@@ -107,6 +107,7 @@ class TAMULookup(Lookup):
             Decimal(result['Longitude']), Decimal(result['Latitude'])
         ))
         feature = Feature(geometry=point, properties={
+            'service': TAMULookup.name,
             'quality': result['NAACCRGISCoordinateQualityCode'],
             'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
             'cached': is_cached,  # should this be a timestamp?
@@ -131,6 +132,7 @@ class OSMLookup(Lookup):
             Decimal(result['lon']), Decimal(result['lat'])
         ))
         feature = Feature(geometry=point, properties={
+            'service': OSMLookup.name,
             'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
             'cached': is_cached,  # should this be a timestamp?
         })

@@ -36,20 +36,22 @@ Querying one location backend:
 ```
 $ curl --silent 'localhost:8080/lookup/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
 {
-  "type": "Feature",
   "properties": {
     "quality": "03",
-    "timestamp": "2016-12-10T03:50:25.123063Z",
+    "service": "tamu",
+    "timestamp": "2016-12-10T07:39:32.374878Z",
     "cached": true
   },
   "geometry": {
-    "type": "Point",
     "coordinates": [
-      "-97.740133410666",
-      "30.2754538274838"
-    ]
-  }
+      -97.740133410666,
+      30.2754538274838
+    ],
+    "type": "Point"
+  },
+  "type": "Feature"
 }
+
 ```
 
 Querying the generic endpoint:
@@ -57,19 +59,20 @@ Querying the generic endpoint:
 ```
 $ curl --silent 'localhost:8080/lookup?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
 {
-  "type": "Feature",
   "properties": {
     "quality": "03",
-    "timestamp": "2016-12-10T03:52:18.988198Z",
+    "service": "tamu",
+    "timestamp": "2016-12-10T07:40:00.110244Z",
     "cached": true
   },
   "geometry": {
-    "type": "Point",
     "coordinates": [
-      "-97.740133410666",
-      "30.2754538274838"
-    ]
-  }
+      -97.740133410666,
+      30.2754538274838
+    ],
+    "type": "Point"
+  },
+  "type": "Feature"
 }
 ```
 
@@ -81,19 +84,35 @@ $ curl --silent 'localhost:8080/lookup?address=1100+Congress+Ave&city=austin&sta
   "type": "FeatureCollection",
   "features": [
     {
-      "type": "Feature",
       "properties": {
         "quality": "03",
-        "timestamp": "2016-12-10T03:53:08.280099Z",
+        "service": "tamu",
+        "timestamp": "2016-12-10T07:40:20.398696Z",
         "cached": true
       },
       "geometry": {
-        "type": "Point",
         "coordinates": [
-          "-97.740133410666",
-          "30.2754538274838"
-        ]
-      }
+          -97.740133410666,
+          30.2754538274838
+        ],
+        "type": "Point"
+      },
+      "type": "Feature"
+    },
+    {
+      "properties": {
+        "cached": true,
+        "service": "osm",
+        "timestamp": "2016-12-10T07:40:20.962264Z"
+      },
+      "geometry": {
+        "coordinates": [
+          -97.740097,
+          30.275564
+        ],
+        "type": "Point"
+      },
+      "type": "Feature"
     }
   ]
 }
