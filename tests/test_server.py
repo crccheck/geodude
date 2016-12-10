@@ -47,7 +47,7 @@ async def test_lookup_returns_service_response(test_client, loop):
 
     mock_get = AsyncMock(return_value={'foo': 'bar'})
 
-    with patch('server.get_from_tamu', new=mock_get):
+    with patch('server.TAMULookup.get_from_backend', new=mock_get):
         resp = await client.get('/lookup', params={
             'address': '1100 Congress Ave',
             'city': 'austin',
@@ -67,7 +67,7 @@ async def test_lookup_returns_all_service_responses(test_client, loop):
 
     mock_get = AsyncMock(return_value={'foo': 'bar'})
 
-    with patch('server.get_from_tamu', new=mock_get):
+    with patch('server.TAMULookup.get_from_backend', new=mock_get):
         resp = await client.get('/lookup', params={
             'address': '1100 Congress Ave',
             'city': 'austin',

@@ -54,57 +54,64 @@ request_count_cached = Counter(
 )
 
 
-async def get_from_tamu(address_components):
-    cache = Cache('tamu')
-    result = cache.get(address_components)
-    is_cached = bool(result)
-    if not is_cached:
-        result = geocode_address(dict(
-            streetAddress=address_components.address,
-            city=address_components.city,
-            state=address_components.state,
-            zip=address_components.zip,
+class Lookup(web.View):
+    name = None
+
+    async def get(self):
+        if {'address', 'city', 'state', 'zip'} - set(self.request.GET):
+            return web.HTTPBadRequest()
+
+        address_components = prep_for_geocoding(
+            address1=self.request.GET.get('address'),
+            address2='',
+            city=self.request.GET.get('city'),
+            state=self.request.GET.get('state'),
+            zipcode=self.request.GET.get('zip'),
+        )
+
+        feature = await self.get_from_backend(address_components)
+
+        request_count.labels(self.name).inc()
+        if feature['properties']['cached']:
+            request_count_cached.labels(self.name).inc()
+
+        return web.Response(
+            text=json.dumps(feature, cls=DjangoJSONEncoder),
+            content_type='application/json',
+            headers={
+                # TODO better header name
+                'X-From-Cache': '1' if feature['properties']['cached'] else '0',
+            },
+        )
+
+
+class TAMULookup(Lookup):
+    name = 'tamu'
+
+    @staticmethod
+    async def get_from_backend(address_components):
+        cache = Cache('tamu')
+        result = cache.get(address_components)
+        is_cached = bool(result)
+        if not is_cached:
+            result = geocode_address(dict(
+                streetAddress=address_components.address,
+                city=address_components.city,
+                state=address_components.state,
+                zip=address_components.zip,
+            ))
+            cache.save(address_components, result)  # TODO do this in the background
+
+        point = Point((
+            Decimal(result['Longitude']), Decimal(result['Latitude'])
         ))
-        cache.save(address_components, result)  # TODO do this in the background
+        feature = Feature(geometry=point, properties={
+            'quality': result['NAACCRGISCoordinateQualityCode'],
+            'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
+            'cached': is_cached,  # should this be a timestamp?
+        })
 
-    point = Point((
-        Decimal(result['Longitude']), Decimal(result['Latitude'])
-    ))
-    feature = Feature(geometry=point, properties={
-        'quality': result['NAACCRGISCoordinateQualityCode'],
-        'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',  # poop
-        'cached': is_cached,  # should this be a timestamp?
-    })
-
-    return feature
-
-
-async def tamu_lookup(request):
-    if {'address', 'city', 'state', 'zip'} - set(request.GET):
-        return web.HTTPBadRequest()
-
-    address_components = prep_for_geocoding(
-        address1=request.GET.get('address'),
-        address2='',
-        city=request.GET.get('city'),
-        state=request.GET.get('state'),
-        zipcode=request.GET.get('zip'),
-    )
-
-    feature = await get_from_tamu(address_components)
-
-    request_count.labels('tamu').inc()
-    if feature['properties']['cached']:
-        request_count_cached.labels('tamu').inc()
-
-    return web.Response(
-        text=json.dumps(feature, cls=DjangoJSONEncoder),
-        content_type='application/json',
-        headers={
-            # TODO better header name
-            'X-From-Cache': '1' if feature['properties']['cached'] else '0',
-        },
-    )
+        return feature
 
 
 async def lookup(request):
@@ -119,7 +126,7 @@ async def lookup(request):
         zipcode=request.GET.get('zip'),
     )
 
-    tamu_feature = await get_from_tamu(address_components)
+    tamu_feature = await TAMULookup.get_from_backend(address_components)
 
     if request.GET.get('return') == 'collection':
         # TODO support multiple points if users requests
@@ -154,7 +161,8 @@ def make_app(loop=None):
         loop = asyncio.get_event_loop()
     app = web.Application(loop=loop)
     app.router.add_get('/lookup', lookup)
-    app.router.add_get('/lookup/tamu', tamu_lookup)
+    app.router.add_get('/lookup/tamu', TAMULookup)
+    # app.router.add_get('/lookup/osm', osm_lookup)
     app.router.add_get('/metrics', metrics)
     return app
 
