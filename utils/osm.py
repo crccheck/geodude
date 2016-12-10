@@ -6,6 +6,11 @@ from . import GeocodeException
 
 
 def geocode_address(address):
+    """
+    Geocode an address.
+
+    http://wiki.openstreetmap.org/wiki/Nominatim
+    """
     params = {
         'format': 'json',
         'street': address.address,
@@ -15,6 +20,8 @@ def geocode_address(address):
         'polygon_geojson': 1,
         'limit': 1,
     }
+    if os.getenv('EMAIL'):
+        params['email'] = os.getenv('EMAIL')
     headers = {
         'user-agent': 'geodude/v0.0',
     }
