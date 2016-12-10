@@ -26,23 +26,74 @@ Query with these get parameters:
 * zip
 
 
-### Example
+Examples
+--------
+
+Querying one location backend:
 
 ```
-$ curl 'localhost:8080/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
+$ curl --silent 'localhost:8080/lookup/tamu?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
 {
+  "type": "Feature",
+  "properties": {
+    "quality": "03",
+    "timestamp": "2016-12-10T03:50:25.123063Z",
+    "cached": true
+  },
   "geometry": {
+    "type": "Point",
     "coordinates": [
       "-97.740133410666",
       "30.2754538274838"
-    ],
-    "type": "Point"
-  },
+    ]
+  }
+}
+```
+
+Querying the generic endpoint:
+
+```
+$ curl --silent 'localhost:8080/lookup?address=1100+Congress+Ave&city=austin&state=tx&zip=78701' | jq .
+{
+  "type": "Feature",
   "properties": {
-    "timestamp": "2016-12-03T03:42:37.605378Z",
-    "quality": "03"
+    "quality": "03",
+    "timestamp": "2016-12-10T03:52:18.988198Z",
+    "cached": true
   },
-  "type": "Feature"
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      "-97.740133410666",
+      "30.2754538274838"
+    ]
+  }
+}
+```
+
+Querying the generic endpoint with no analysis, `return=collection`:
+
+```
+$ curl --silent 'localhost:8080/lookup?address=1100+Congress+Ave&city=austin&state=tx&zip=78701&return=collection' | jq .
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "quality": "03",
+        "timestamp": "2016-12-10T03:53:08.280099Z",
+        "cached": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-97.740133410666",
+          "30.2754538274838"
+        ]
+      }
+    }
+  ]
 }
 ```
 
