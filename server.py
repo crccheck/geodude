@@ -13,7 +13,8 @@ from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 from utils.address import prep_for_geocoding
 from utils.cache import Cache
 from utils.json import DjangoJSONEncoder
-from utils.tamu import geocode_address
+from utils.osm import geocode_address as osm_geocode_address
+from utils.tamu import geocode_address as tamu_geocode_address
 
 
 logger = logging.getLogger(__name__)
@@ -94,7 +95,7 @@ class TAMULookup(Lookup):
         result = cache.get(address_components)
         is_cached = bool(result)
         if not is_cached:
-            result = geocode_address(dict(
+            result = tamu_geocode_address(dict(
                 streetAddress=address_components.address,
                 city=address_components.city,
                 state=address_components.state,
@@ -123,7 +124,7 @@ class OSMLookup(Lookup):
         result = cache.get(address_components)
         is_cached = bool(result)
         if not is_cached:
-            result = geocode_address(dict(
+            result = osm_geocode_address(dict(
                 streetAddress=address_components.address,
                 city=address_components.city,
                 state=address_components.state,

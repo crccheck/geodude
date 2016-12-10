@@ -24,7 +24,7 @@ def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
     return int(credits)
 
 
-def geocode_address(address, force=False):
+def geocode_address(address):
     """
     Geocode an address dict.
 
