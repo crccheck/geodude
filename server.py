@@ -7,6 +7,7 @@ import os
 from decimal import Decimal
 
 from aiohttp import web
+from aiohttp_swagger import setup_swagger
 from geojson import Feature, FeatureCollection, Point
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
@@ -88,6 +89,15 @@ class Lookup(web.View):
 
 
 class TAMULookup(Lookup):
+    """
+    ---
+    description: test
+    produces:
+    - application/json
+    responses:
+        "200":
+            description: hi
+    """
     name = 'tamu'
 
     @staticmethod
@@ -143,6 +153,35 @@ class OSMLookup(Lookup):
 
 
 class MasterLookup(Lookup):
+    """
+    ---
+    description: Get the latitude and longitude of an address.
+    parameters:
+    - name: address
+      description: Street address
+      in: query
+      required: true
+      type: string
+    - name: city
+      in: query
+      required: true
+      type: string
+    - name: state
+      in: query
+      required: true
+      type: string
+    - name: zip
+      in: query
+      required: true
+      type: string
+    - name: return
+      in: query
+      enum:
+      - collection
+
+    produces:
+    - application/json
+    """
     async def get(self):
         address_components = self.get_address()
 
@@ -184,6 +223,11 @@ def make_app(loop=None):
     app.router.add_get('/lookup/osm', OSMLookup)
     app.router.add_get('/lookup/tamu', TAMULookup)
     app.router.add_get('/metrics', metrics)
+    setup_swagger(
+        app,
+        swagger_url='/doc',
+        title='hiya',
+    )
     return app
 
 
