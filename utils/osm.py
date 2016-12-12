@@ -17,7 +17,7 @@ def geocode_address(address):
         'city': address.city,
         'state': address.state,
         'postalcode': address.zip,
-        'polygon_geojson': 1,
+        'polygon_geojson': 1,  # TODO this doesn't appear to do anything
         'limit': 1,
     }
     if os.getenv('EMAIL'):
