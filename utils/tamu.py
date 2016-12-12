@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from . import GeocodeException, USER_AGENT
+
 
 def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
     """
@@ -22,26 +24,18 @@ def get_remaining_credits(api_key=os.getenv('TAMU_API_KEY')):
     return int(credits)
 
 
-class GeocodeException(Exception):
-    pass
-
-
-def geocode_address(address, force=False):
+def geocode_address(address):
     """
-    Geocode an address dict.
-
-    Address dict should have as many of these keys:
-      streetAddress, city, state, zip
+    Geocode an address.
 
     Examples:
     https://geoservices.tamu.edu/Services/Geocode/WebService/v04_01/Simple/Rest/
     """
-    if not address['city'] and not address['zip']:
-        raise GeocodeException("Can't look up without a city or zip")
     api_key = os.getenv('TAMU_API_KEY')
     if not api_key:
         raise GeocodeException(
             "Can't look up without 'TAMU_API_KEY' environment variable")
+
     url = (
         'https://geoservices.tamu.edu/Services/Geocode/WebService/'
         'GeocoderWebServiceHttpNonParsed_V04_01.aspx'
@@ -49,16 +43,17 @@ def geocode_address(address, force=False):
     params = {
         'apiKey': api_key,
         'version': '4.01',
+        'streetAddress': address.address,
+        'city': address.city,
+        'state': address.state,
+        'zip': address.zip,
     }
-    params.update(address)
     headers = {
-        'user-agent': 'my-little-pointies/v0.0'
+        'user-agent': USER_AGENT,
     }
     response = requests.get(url, params=params, headers=headers)
     if not response.ok:
-        raise GeocodeException(
-            'Got a non-200 response: {}'
-            .format(response.status_code))
+        raise GeocodeException('Got a non-200 response: {}'.format(response.status_code))
     fields = [
         'TransactionId',
         'Version',
