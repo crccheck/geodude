@@ -77,10 +77,6 @@ class Lookup(web.View):
 
         feature = await self.get_from_backend(address_components)
 
-        request_count.labels(self.name).inc()
-        if feature['properties']['cached']:
-            request_count_cached.labels(self.name).inc()
-
         return web.Response(
             text=json.dumps(feature, cls=GeoJSONEncoder),
             content_type='application/json',
@@ -99,9 +95,12 @@ class TAMULookup(Lookup):
         cache = Cache(TAMULookup.name)
         result = cache.get(address_components)
         is_cached = bool(result)
-        if not is_cached:
+        if is_cached:
+            request_count_cached.labels(TAMULookup.name).inc()
+        else:
             result = tamu_geocode_address(address_components)
             cache.save(address_components, result)  # TODO do this in the background
+        request_count.labels(TAMULookup.name).inc()
 
         point = Point((
             Decimal(result['Longitude']), Decimal(result['Latitude'])
@@ -124,9 +123,12 @@ class OSMLookup(Lookup):
         cache = Cache(OSMLookup.name)
         result = cache.get(address_components)
         is_cached = bool(result)
-        if True or not is_cached:
+        if is_cached:
+            request_count_cached.labels(OSMLookup.name).inc()
+        else:
             result = osm_geocode_address(address_components)
             cache.save(address_components, result)  # TODO do this in the background
+        request_count.labels(OSMLookup.name).inc()
 
         point = Point((
             Decimal(result['lon']), Decimal(result['lat'])
@@ -150,8 +152,6 @@ class MasterLookup(Lookup):
             lambda x: asyncio.ensure_future(x.get_from_backend(address_components), loop=loop),
             backends
         ))
-        for backend in backends:
-            request_count.labels(backend.name).inc()
 
         if self.request.GET.get('return') == 'collection':
             data = FeatureCollection(all_features)
