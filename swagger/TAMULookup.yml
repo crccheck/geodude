@@ -1,0 +1,24 @@
+---
+description: Get the latitude and longitude of an address.
+parameters:
+- name: address
+  description: Street address
+  in: query
+  required: true
+  type: string
+- name: city
+  in: query
+  required: true
+  type: string
+- name: state
+  in: query
+  required: true
+  type: string
+- name: zip
+  in: query
+  required: true
+  type: string
+produces:
+- application/json
+responses:
+    "200": GeoJSON
