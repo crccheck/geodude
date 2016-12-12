@@ -142,14 +142,16 @@ class OSMLookup(Lookup):
 
 class MasterLookup(Lookup):
     async def get(self):
-        loop = self.request.app.loop  # alias
         address_components = self.get_address()
 
+        loop = self.request.app.loop  # alias
         backends = [TAMULookup, OSMLookup]
         all_features = await asyncio.gather(*map(
             lambda x: asyncio.ensure_future(x.get_from_backend(address_components), loop=loop),
             backends
         ))
+        for backend in backends:
+            request_count.labels(backend.name).inc()
 
         if self.request.GET.get('return') == 'collection':
             data = FeatureCollection(all_features)
@@ -157,12 +159,8 @@ class MasterLookup(Lookup):
             # TODO average features
             data = all_features[0]
 
-        text = json.dumps(data, cls=GeoJSONEncoder)
-
-        request_count.labels('tamu').inc()
-
         return web.Response(
-            text=text,
+            text=json.dumps(data, cls=GeoJSONEncoder),
             content_type='application/json',
         )
 
