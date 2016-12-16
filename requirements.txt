@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+aiohttp-swagger==1.0.4
 aiohttp==1.1.6
 async-timeout==1.1.0      # via aiohttp
 chardet==2.3.0            # via aiohttp
@@ -13,6 +14,8 @@ first==2.0.1              # via pip-tools
 flake8==3.2.1
 future==0.16.0            # via usaddress
 geojson==1.3.3
+jinja2==2.8               # via aiohttp-swagger
+MarkupSafe==0.23          # via jinja2
 mccabe==0.5.2             # via flake8
 metafone==0.5             # via usaddress
 multidict==2.1.4          # via aiohttp, yarl
@@ -26,7 +29,8 @@ pyflakes==1.3.0           # via flake8
 pytest-aiohttp==0.1.3
 pytest-cov==2.4.0
 pytest==3.0.5
-python-crfsuite==0.8.4    # via usaddress
+python-crfsuite==0.9      # via usaddress
+pyyaml==3.12              # via aiohttp-swagger
 requests==2.12.3
 six==1.10.0               # via pip-tools
 usaddress==0.5.7
