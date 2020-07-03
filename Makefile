@@ -20,3 +20,6 @@ tdd: ## Run tests with a watcher
 
 test: ## Run test suite
 	pytest --cov
+
+lint: ## Run lint check
+	black --check .
