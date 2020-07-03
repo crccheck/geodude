@@ -6,6 +6,13 @@ before_install:
   - pip install poetry
 install:
   - poetry install -v
-script: make test
+script:
+  - make test
+  - make lint
 env:
   - TAMU_API_KEY=00000000000000000000000000000000
+branches:
+  only:
+    - master
+notifications:
+  email: false
