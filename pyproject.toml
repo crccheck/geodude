@@ -7,8 +7,19 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
+aiohttp = "^3.6.2"
+aiohttp_swagger = "^1.0.14"
+geojson = "^2.5.0"
+project-runpy = "^1.0.1"
+requests = "^2.24.0"
+usaddress = "^0.5.10"
+prometheus-client = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
+pytest = "^5.4.3"
+pytest-aiohttp = "^0.3.0"
+pytest-cov = "^2.10.0"
+flake8 = "^3.8.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
