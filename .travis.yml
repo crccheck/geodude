@@ -1,7 +1,11 @@
+dist: bionic
 language: python
 cache: pip
-python: "3.5"
-install: make install
+python: "3.7"
+before_install:
+  - pip install poetry
+install:
+  - poetry install -v
 script: make test
 env:
   - TAMU_API_KEY=00000000000000000000000000000000
