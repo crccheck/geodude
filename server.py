@@ -59,15 +59,15 @@ class Lookup(web.View):
     name = ''
 
     def get_address(self):
-        if {"address", "city", "state", "zip"} - set(self.request.GET):
+        if {"address", "city", "state", "zip"} - set(self.request.query):
             return  # TODO raise exception
 
         return prep_for_geocoding(
-            address1=self.request.GET.get("address"),
+            address1=self.request.query.get("address"),
             address2="",
-            city=self.request.GET.get("city"),
-            state=self.request.GET.get("state"),
-            zipcode=self.request.GET.get("zip"),
+            city=self.request.query.get("city"),
+            state=self.request.query.get("state"),
+            zipcode=self.request.query.get("zip"),
         )
 
     async def get(self):
@@ -164,7 +164,7 @@ class MasterLookup(Lookup):
             )
         )
 
-        if self.request.GET.get("return") == "collection":
+        if self.request.query.get("return") == "collection":
             data = FeatureCollection(all_features)
         else:
             # TODO average features

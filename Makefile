@@ -16,7 +16,7 @@ dev: ## Start the development environment
 	nodemon --ext py -x python server.py
 
 tdd: ## Run tests with a watcher
-	LOGGING_LEVEL=CRITICAL nodemon --ext py -x sh -c "pytest -sx || true"
+	LOGGING_LEVEL=CRITICAL ptw -- -sx
 
 test: ## Run test suite
 	pytest --cov
