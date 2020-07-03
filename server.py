@@ -56,7 +56,7 @@ request_count_cached = Counter(
 
 
 class Lookup(web.View):
-    name = ''
+    name = ""
 
     def get_address(self):
         if {"address", "city", "state", "zip"} - set(self.request.query):
