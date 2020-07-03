@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-aiohttp = "^3.6.2"
+aiohttp = {extras = ["speedups"], version = "^3.6.2"}
 aiohttp_swagger = "^1.0.14"
 geojson = "^2.5.0"
 project-runpy = "^1.0.1"
