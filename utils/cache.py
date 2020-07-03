@@ -21,7 +21,7 @@ class Cache:
         self.service = service
         self.data_dir = data_dir or os.getenv("DATA_DIR")
         if self.data_dir and not os.path.isdir(self.data_dir):
-            logger.warn(
+            logger.warning(
                 "%s is not a directory, I will attempt to create it", self.data_dir
             )
 
