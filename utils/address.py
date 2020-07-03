@@ -104,7 +104,7 @@ def clean_street(address1, address2="", *, zipcode=None, strip_occupancy=False):
         )
         addr, type_ = usaddress.tag(address_to_parse)
     except usaddress.RepeatedLabelError:
-        logger.warn("Unparseable address: {}".format(address_to_parse))
+        logger.warning("Unparseable address: {}".format(address_to_parse))
         return address
 
     if zipcode:
@@ -114,9 +114,9 @@ def clean_street(address1, address2="", *, zipcode=None, strip_occupancy=False):
             guessed_zip = addr.pop("ZipCode")
             assert guessed_zip == zipcode
         except KeyError:
-            logger.warn("Expected zipcode %s but found none", zipcode)
+            logger.warning("Expected zipcode %s but found none", zipcode)
         except AssertionError:
-            logger.warn(
+            logger.warning(
                 "Guessed the wrong zipcode {} != {}".format(guessed_zip, zipcode)
             )
     if strip_occupancy:
@@ -130,7 +130,7 @@ def clean_street(address1, address2="", *, zipcode=None, strip_occupancy=False):
         return " ".join(
             [component_format(label, value) for label, value in addr.items()]
         )
-    logger.warn("Ambiguous address: {}".format(address), extra=addr)
+    logger.warning("Ambiguous address: {}".format(address), extra=addr)
     return address
 
 
